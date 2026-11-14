@@ -1,0 +1,42 @@
+Build a mobile-first website (a single-page web app that opens in a phone browser) called "Chart Reader" (சார்ட் ரீடர்). The user uploads a screenshot of a stock/crypto/forex price chart and the site reads it like a technical analyst and returns a written report: where price stands now, what just happened, and roughly how far it could go up or down.
+
+INPUT
+- Upload, drag-drop, or paste 1 to 3 chart screenshots (the same instrument, different timeframes).
+- Optional fields: symbol, timeframe, "my position" (none / long / short) with entry price, a specific question.
+- A "deep analysis" switch (slower, more thorough model).
+- A Demo button that shows a sample report with no API call.
+
+ANALYSIS
+- Send the image(s) to a vision-capable AI model through its API (for example the Anthropic Claude API).
+- The user pastes their own API key once in a Settings box. Store it in the browser only (localStorage). Never hard-code a key and never send it anywhere except the AI provider.
+- Ask the model to reply with only one JSON object: symbol, exchange, timeframe, last_price, day_change_pct, headline, trend {short, medium, note}, recent_move {text, from, to, pct}, support[] and resistance[] ({price, note}, nearest first, 1 to 3 each), volume, candles, indicators, events, scenarios {up, down} (each: chance low|medium|high, trigger, trigger_price, target, target_note, reason), invalidation, watch[], position {summary, risk_reward}, answer, confidence, caveats.
+- Method for the model: read the header and price axis, estimate swing highs and lows, compute the recent move in %, find support and resistance from repeated reversals, compare volume with its average, describe the last 5 to 10 candles, then give conditional scenarios. Up target must be above the last price, down target below it. If the image is not a price chart, return an error.
+- Validate and clean the JSON in code before showing it (drop levels on the wrong side of the price, fix bad values).
+
+REPORT SCREEN (written report style, no chat voice, no first person, no greetings)
+- Header: symbol, timeframe, last price, day change in green or red.
+- One-sentence headline.
+- A price ladder drawn to scale: resistance, support, up/down targets, and a marker for the current price.
+- Trend, recent move, volume, candles, indicators.
+- Two scenario cards (up and down), each with a 3-pip chance meter, the trigger, the target and the reason.
+- "What makes this reading wrong" and 2 to 4 things to watch.
+- If the user gave a position: distance to levels in % and a rough risk:reward.
+- Confidence level and caveats. Footer: "Prices are rough readings from the image. This is not buy or sell advice."
+- Buttons: Save to history, Copy.
+
+HISTORY
+- Save analyses in localStorage with a small thumbnail.
+- Per entry, a field to type the latest price. The site then marks whether the up target or down target was reached, and shows a running count of how often the higher-chance side was right.
+- Export all data to a JSON file and import it back, so nothing is lost when browser data is cleared.
+
+RULES
+- The AI must never say buy, sell, hold, add or exit. Scenarios are conditional ("if price closes above X").
+- Indian number format (₹ and lakh grouping) where the currency is INR.
+
+UI
+- All interface text in Tamil, with common trading terms kept in English (support, resistance, breakout, volume, RSI).
+- Phone first, at least 16px side padding, no horizontal scroll, large tap targets.
+- Light and dark themes that follow the system setting.
+- Calm ledger-style design: numbers in a monospace font, thin ruled lines, green for gain and red for loss, one accent colour.
+- Show clear loading, error and empty states. Never reload the page to recover.
+- Deliver as one self-contained HTML file with no build step.
